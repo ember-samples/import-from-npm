@@ -1,12 +1,24 @@
 /*jshint node:true*/
 /* global require, module */
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
-
+var mergeTrees = require('broccoli-merge-trees');
+var Funnel = require('broccoli-funnel');
 module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
     // Add options here
+    trees: {
+      vendor: new Funnel('node_modules/babel-polyfill/dist', {
+        // files: ['polyfill.js'],
+        destDir: 'babel-polyfill'
+      })
+    }
   });
-
+  // app.import('node_modules/babel-polyfill/dist/polyfill.js');
+  var nodeModulesClientDependencies = new Funnel('node_modules/babel-polyfill/dist', {
+    files: ['polyfill.js'],
+    destDir: 'vendor'
+  });
+  // app.import('vendor/babel-polyfill/polyfill.js');
   // Use `app.import` to add additional libraries to the generated
   // output files.
   //
@@ -20,5 +32,5 @@ module.exports = function(defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
-  return app.toTree();
+  return mergeTrees([nodeModulesClientDependencies, app.toTree()]);
 };
